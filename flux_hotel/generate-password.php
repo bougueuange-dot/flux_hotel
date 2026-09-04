@@ -1,0 +1,1 @@
+<?php $password = 'ReceptionFlow2026!'; $hash = password_hash($password, PASSWORD_DEFAULT); echo '<h2>Mot de passe de démonstration</h2>'; echo '<p>Mot de passe :</p>'; echo '<strong>ReceptionFlow2026!</strong>'; echo '<p>Hash :</p>'; echo '<textarea rows="4" cols="80">'; echo htmlspecialchars($hash); echo '</textarea>';

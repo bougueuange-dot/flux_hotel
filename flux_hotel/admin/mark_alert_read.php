@@ -1,0 +1,14 @@
+<?php session_start(); require_once __DIR__ . '/../config/database.php'; 
+ // ===================================================== // TEST SESSION // =====================================================
+ echo '<h2>Test marquage alerte</h2>'; echo '<p>User ID : '; if (isset($_SESSION['user_id'])) { echo htmlspecialchars($_SESSION['user_id']); } else { echo 'ABSENT'; } echo '</p>'; echo '<p>Hotel ID : '; if (isset($_SESSION['hotel_id'])) { echo htmlspecialchars($_SESSION['hotel_id']); } else { echo 'ABSENT'; } echo '</p>';
+ // ===================================================== // TEST ID ALERTE // =====================================================
+ echo '<p>Alert ID : '; if (isset($_GET['id'])) { echo htmlspecialchars($_GET['id']); } else { echo 'ABSENT'; } echo '</p>';
+ // ===================================================== // VÉRIFICATION // =====================================================
+ if (!isset($_SESSION['hotel_id'])) { die('<strong>ERREUR : hotel_id absent.</strong>'); } if (!isset($_GET['id'])) { die('<strong>ERREUR : ID de l\'alerte absent.</strong>'); } $hotel_id = (int) $_SESSION['hotel_id']; $alert_id = (int) $_GET['id']; 
+  // ===================================================== // VÉRIFIER QUE L'ALERTE EXISTE // =====================================================
+  $stmt = $pdo->prepare(" SELECT id, hotel_id, is_read FROM alerts WHERE id = :id "); $stmt->execute([ ':id' => $alert_id ]); $alert = $stmt->fetch(PDO::FETCH_ASSOC); if (!$alert) { die('<strong>ERREUR : cette alerte n\'existe pas.</strong>'); } echo '<p>Alerte trouvée : OUI</p>'; echo '<p>Hotel ID de l\'alerte : ' . htmlspecialchars($alert['hotel_id']) . '</p>'; echo '<p>État actuel is_read : ' . htmlspecialchars($alert['is_read']) . '</p>';
+  // ===================================================== // VÉRIFIER L'HÔTEL // =====================================================
+  if ((int)$alert['hotel_id'] !== $hotel_id) { die( '<strong>ERREUR : cette alerte appartient à un autre hôtel.</strong>' ); } 
+  // ===================================================== // MODIFICATION // =====================================================
+  $stmt = $pdo->prepare(" UPDATE alerts SET is_read = 1 WHERE id = :id AND hotel_id = :hotel_id "); $stmt->execute([ ':id' => $alert_id, ':hotel_id' => $hotel_id ]); echo '<p>Nombre de lignes modifiées : ' . $stmt->rowCount() . '</p>';
+  $stmt = $pdo->prepare(" SELECT is_read FROM alerts WHERE id = :id "); $stmt->execute([ ':id' => $alert_id ]); $result = $stmt->fetch(PDO::FETCH_ASSOC); echo '<p>Nouvelle valeur is_read : <strong>' . htmlspecialchars($result['is_read']) . '</strong></p>'; echo '<br>'; echo '<a href="alerts.php"> Retour aux alertes </a>';
